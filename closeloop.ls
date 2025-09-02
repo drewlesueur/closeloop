@@ -960,7 +960,9 @@ def updateLiveHistory commandHistory
         case "SEE FILE SKELETON"
             var pathToFile argLine
             var ret []
-            if fileExists pathToFile
+            if isDir pathToFile
+                command to error %% ******** file %pathToFile is a directory, use "SEE DIR" ********
+            else if fileExists pathToFile
                 readFile pathToFile
                 split newline
                 as theLines
@@ -976,6 +978,9 @@ def updateLiveHistory commandHistory
                 var lastWasSkipped false
 
                 theLines each i line
+                    # say "indents"
+                    # say indents toJsonF
+                    # say "i" i
                     var back3 toInt is 0 indents sub i - 3
                     var back2 toInt is 0 indents sub i - 2
                     var back1 toInt is 0 indents sub i - 1
@@ -1335,6 +1340,7 @@ def getAgentInstructions
         If you have enough information to issue a "PATCH FILE" command, please do so.
 
         Note if you see any test failures, but have since issued file updates, then try running the tests again.
+        If you are asked to run tests, do not issue "DONE: Yes" until you have seen the tests pass.
 
         Ok here goes. Here is the the original task... and note, it may be partially done, use the context provided take the next step or steps.
     end
