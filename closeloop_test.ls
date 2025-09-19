@@ -1,4 +1,6 @@
 # How to run:
+# rm -f /usr/local/bin/closeloop
+# rm -f /usr/local/closeloop
 # ln -sf $(pwd)/closeloop.ls /usr/local/bin/closeloop
 # ln -sf $(pwd) /usr/local/closeloop
 # echo "ok" | ./closeloop.ls TEST
@@ -1676,6 +1678,65 @@ def doTests
             C
         end
     end
+    
+    # we removed required order because gpt-4.1 wasn't always giving patch sections in correct order
+    # howevever if we get an empty diff in one or more patch sections
+    # include that context for the next patch
+    
+    # open question, should we include it for subsequent patches?
+    def testPatching_emptyContextStacks
+        deleteFile .delme.txt
+        writeFile .drew.txt %%
+            Yo
+            func sayHi() {
+                // hey
+                println("hi")
+            }
+            func sayCool() {
+                // cool
+                println("cool")
+            }
+            func sayBye() {
+                // cya
+                println("bye")
+            }
+        end
+        var commandHistory []
+        string
+            PATCH FILE: drew.txt
+            @@ foo
+            @@
+                 func sayCool() {
+            @@
+                 }
+            @@
+            +// some comments
+            +// here
+            END PATCH
+        end
+        parseCommands
+        processCommands it commandHistory
+        readFile .drew.txt
+        assertEq it %%
+            Yo
+            func sayHi() {
+                // hey
+                println("hi")
+            }
+            func sayCool() {
+                // cool
+                println("cool")
+            }
+            // some comments
+            // here
+            func sayBye() {
+                // cya
+                println("bye")
+            }
+        end
+    end
+    testPatching_emptyContextStacks, exit
+    exit
     
     def testPatching_commandDebug
         writeFile .drew.txt %%

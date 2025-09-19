@@ -1,8 +1,13 @@
 #!/usr/local/bin/linescript4
 # How to run:
+# rm -f /usr/local/bin/closeloop
+# rm -f /usr/local/closeloop
 # ln -sf $(pwd)/closeloop.ls /usr/local/bin/closeloop
 # ln -sf $(pwd) /usr/local/closeloop
 # echo "ok" | ./closeloop.ls TEST
+
+# TODO: if a patch section only has context lines, use it as context for the next patch!, and even multiple subsequent!
+
 
 # TODO: better errors when it can't find context because start of file or end of file
 
@@ -322,7 +327,7 @@ def agentLoop_liveContext_nextStep provider model prompt
         say "******** " (len fullPrompt) "chars"
         say "******** " (len fullPrompt, / 4) "tokens (estimate)"
 
-
+        # Interesting2 this llmResponse has commands in it too, so some duplication
         llmCall provider model fullPrompt
         as llmResponse
 
@@ -640,7 +645,6 @@ def patchFile pathToFile body
         if (sectionLines, len, is 1) and (sectionLines at 1, is "[START OF FILE]", or sectionLines at 1, is "[END OF FILE]") and (change at findLines, len, > 0)
             var sectionLines []
         end
-
 
         label processSectionLine
         var sectionLine sectionLines shift
@@ -1341,6 +1345,7 @@ def getAgentInstructions
 
         Note if you see any test failures, but have since issued file updates, then try running the tests again.
         If you are asked to run tests, do not issue "DONE: Yes" until you have seen the tests pass.
+        Also only ever issue "DONE: Yes" alone, no other commands can be issued when you have "DONE: Yes"
 
         Ok here goes. Here is the the original task... and note, it may be partially done, use the context provided take the next step or steps.
     end
